@@ -15,7 +15,7 @@ ConfigManager::ConfigManager(QWidget *parent)
     : QWidget{parent}
 {
     this->connectionPath="./config/connectionList.json";
-    this->clientConfigPath="./client.json";
+    this->clientConfigPath="./config/config.json";
 
     this->connectionPath = this->getAbsolutePath(this->connectionPath);
     this->clientConfigPath = this->getAbsolutePath(this->clientConfigPath);

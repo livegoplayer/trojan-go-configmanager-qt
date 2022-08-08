@@ -20,7 +20,8 @@ SOURCES += \
     mainwindow.cpp \
     qconfigjsonobject.cpp \
     qtrojangoclientconfigjsonobject.cpp \
-    rulelistedit.cpp
+    rulelistedit.cpp \
+    trojangomanger.cpp
 
 HEADERS += \
     additemdialog.h \
@@ -33,7 +34,9 @@ HEADERS += \
     mainwindow.h \
     qconfigjsonobject.h \
     qtrojangoclientconfigjsonobject.h \
-    rulelistedit.h
+    rulelistedit.h \
+    trojan-go-start.h \
+    trojangomanger.h
 
 FORMS += \
     additemdialog.ui \
@@ -54,3 +57,9 @@ CONFIG += embed_translations
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+
+win32: LIBS += -L$$PWD/./ -ltrojan-go-start
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

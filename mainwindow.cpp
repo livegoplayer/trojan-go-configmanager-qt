@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     this->advancedSettingsForm = new AdvancedSettingsForm();
+    this->TrojanGoManger = new class TrojanGoManger();
 
     connect(ui->ActionAdd,
             &QAction::triggered,
@@ -54,6 +55,22 @@ MainWindow::MainWindow(QWidget *parent)
             [=] () {
             this->advancedSettingsForm->InitAdvancedSettingFoem();
             this->advancedSettingsForm->show();
+    });
+
+    connect(ui->ActionConnect,
+            &QAction::triggered,
+            this,
+            [=] () {
+            ui->CL->ConfigManager->CreateClientConfigByItemIndex(0);
+            this->TrojanGoManger->start();
+    });
+
+    connect(ui->ActionDisconnect,
+            &QAction::triggered,
+            this,
+            [=] () {
+            this->TrojanGoManger->Disconnet();
+            this->TrojanGoManger->quit();
     });
 }
 

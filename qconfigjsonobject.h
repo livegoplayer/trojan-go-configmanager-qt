@@ -20,7 +20,7 @@ public:
     constexpr static const char DEFAULT_LOCAL_ADDRESS[] = "127.0.0.1";
     static const int DEFAULT_LOCAL_PORT = 8080;
     static const int DEFAULT_LOG_LEVEL = 1;
-    constexpr static const char DEFAULT_LOG_FILE_PATH[] = "$PROGRAM_DIR$/log/client.log"; // 未指定则使用标准输出
+    constexpr static const char DEFAULT_LOG_FILE_PATH[] = "./client.log"; // 未指定则使用标准输出
     static const bool DEFAULT_DISABLE_HTTP_CHECK = false;
     static const int DEFAULT_UDP_TIMMEOUT = 60;
     constexpr static const char disableHttpCheckKey[] = "disable_http_check";

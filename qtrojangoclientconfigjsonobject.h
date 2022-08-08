@@ -18,7 +18,7 @@ public:
     static const int NONE = 5;
 
     // logfile
-    constexpr static const char DEFAULT_LOG_FILE_PATH[] = "$PROGRAM_DIR$/log/client.log"; // 未指定则使用标准输出
+    constexpr static const char DEFAULT_LOG_FILE_PATH[] = "./client.log"; // 未指定则使用标准输出
 
     // default serveraddress and port
     constexpr static const char DEFAULT_LOCAL_ADDRESS[] = "127.0.0.1";
@@ -68,7 +68,7 @@ public:
 
 
     // 根配置
-    constexpr static const char runTypeKey[] = "client";
+    constexpr static const char runTypeKey[] = "run_type";
     constexpr static const char localAddrKey[] = "local_addr";
     constexpr static const char localPortKey[] = "local_port";
     constexpr static const char remoteAddrKey[] = "remote_addr";

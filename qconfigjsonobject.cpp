@@ -880,7 +880,7 @@ bool QConfigJsonObject::GetDisableHttpCheckKey(){
 }
 
 QConfigJsonObject* QConfigJsonObject::SetDisableHttpCheckKey(QString val){
-    this->insert(logFileKey, val);
+    this->insert(disableHttpCheckKey, val);
     return this;
 }
 

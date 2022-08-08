@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "advancedsettingsform.h"
+#include "trojangomanger.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,6 +16,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    TrojanGoManger *TrojanGoManger;
 
     int AddConnection();
     int RefleshConnectionList();

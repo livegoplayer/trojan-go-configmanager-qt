@@ -720,16 +720,16 @@ QTrojanGoClientConfigJsonObject* QTrojanGoClientConfigJsonObject::SetRemoteAddr(
 }
 
 int QTrojanGoClientConfigJsonObject::GetRemotePort(){
-    if(this->contains(remoteAddrKey))
+    if(this->contains(remotePortKey))
     {
-        QJsonValue port = this->value(remoteAddrKey);
+        QJsonValue port = this->value(remotePortKey);
         return port.toInt();
     }
     return DEFAULT_REMOTE_PORT;
 }
 
 QTrojanGoClientConfigJsonObject* QTrojanGoClientConfigJsonObject::SetRemotePort(int port){
-    this->insert(remoteAddrKey, port);
+    this->insert(remotePortKey, port);
     return this;
 }
 
@@ -771,7 +771,7 @@ bool QTrojanGoClientConfigJsonObject::GetDisableHttpCheckKey(){
 }
 
 QTrojanGoClientConfigJsonObject* QTrojanGoClientConfigJsonObject::SetDisableHttpCheckKey(bool val){
-    this->insert(logFileKey, val);
+    this->insert(disableHttpCheckKey, val);
     return this;
 }
 
