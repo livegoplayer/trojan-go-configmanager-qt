@@ -45,8 +45,7 @@ import (
 var P *proxy.Proxy
 
 //export Start
-func Start() {
-	path := "F:\\projects\\qt\\build-trojan-go-desktop-Desktop_Qt_6_3_1_MinGW_64_bit-Debug\\debug\\config\\config.json"
+func Start(path string) {
 	data, isJSON, err := detectAndReadConfig(path)
 	if err != nil {
 		log.Fatal(err)

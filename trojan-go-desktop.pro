@@ -9,44 +9,50 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    additemdialog.cpp \
-    advancedsettingsform.cpp \
-    configmanager.cpp \
-    connectionform.cpp \
-    connectionlist.cpp \
-    editmuxsettingsform.cpp \
-    edittcpsettingsform.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    qconfigjsonobject.cpp \
-    qtrojangoclientconfigjsonobject.cpp \
-    rulelistedit.cpp \
-    trojangomanger.cpp
+    src/theme/qthemeconfig.cpp \
+    src/ui/additemdialog.cpp \
+    src/ui/advancedsettingsform.cpp \
+    src/config/configmanager.cpp \
+    src/ui/connectionform.cpp \
+    src/ui/connectionlist.cpp \
+    src/ui/editmuxsettingsform.cpp \
+    src/ui/edittcpsettingsform.cpp \
+    src/main.cpp \
+    src/ui/mainwindow.cpp \
+    src/config/qconfigjsonobject.cpp \
+    src/config/qtrojangoclientconfigjsonobject.cpp \
+    src/ui/rulelistedit.cpp \
+    src/proxy/systemproxymanager.cpp \
+    src/traymenu/traymenu.cpp \
+    src/trojan/trojangomanger.cpp
 
 HEADERS += \
-    additemdialog.h \
-    advancedsettingsform.h \
-    configmanager.h \
-    connectionform.h \
-    connectionlist.h \
-    editmuxsettingsform.h \
-    edittcpsettingsform.h \
-    mainwindow.h \
-    qconfigjsonobject.h \
-    qtrojangoclientconfigjsonobject.h \
-    rulelistedit.h \
-    trojan-go-start.h \
-    trojangomanger.h
+    src/theme/qthemeconfig.h \
+    src/ui/additemdialog.h \
+    src/ui/advancedsettingsform.h \
+    src/config/configmanager.h \
+    src/ui/connectionform.h \
+    src/ui/connectionlist.h \
+    src/ui/editmuxsettingsform.h \
+    src/ui/edittcpsettingsform.h \
+    src/ui/mainwindow.h \
+    src/config/qconfigjsonobject.h \
+    src/config/qtrojangoclientconfigjsonobject.h \
+    src/ui/rulelistedit.h \
+    src/proxy/systemproxymanager.h \
+    src/traymenu/traymenu.h \
+    src/trojan/trojan-go-start.h \
+    src/trojan/trojangomanger.h
 
 FORMS += \
-    additemdialog.ui \
-    advancedsettingsform.ui \
-    connectionform.ui \
-    connectionlist.ui \
-    editmuxsettingsform.ui \
-    edittcpsettingsform.ui \
-    mainwindow.ui \
-    rulelistedit.ui
+    ui/additemdialog.ui \
+    ui/advancedsettingsform.ui \
+    ui/connectionform.ui \
+    ui/connectionlist.ui \
+    ui/editmuxsettingsform.ui \
+    ui/edittcpsettingsform.ui \
+    ui/mainwindow.ui \
+    ui/rulelistedit.ui
 
 TRANSLATIONS += \
     trojan-go-desktop_zh_CN.ts
@@ -59,7 +65,19 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-win32: LIBS += -L$$PWD/./ -ltrojan-go-start
 
 INCLUDEPATH += $$PWD/.
 DEPENDPATH += $$PWD/.
+
+RESOURCES += \
+    res/qss.qrc \
+    res/res.qrc
+
+win32: LIBS += -lwininet
+
+win32: LIBS += -lrasapi32
+
+win32: LIBS += -L$$PWD/lib/windows/ -ltrojan-go-start
+
+INCLUDEPATH += $$PWD/lib/windows
+DEPENDPATH += $$PWD/lib/windows
