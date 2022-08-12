@@ -392,8 +392,3 @@ void MainWindow::reflashActions(int row){
     }
 }
 
-void MainWindow::warnQuit(){
-    QMessageBox::warning(this, "提示", "不是有效的分享链接");
-}
-
-

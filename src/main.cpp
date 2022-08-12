@@ -19,11 +19,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    static QSharedMemory *sm = new QSharedMemory("trojan-go-configmanager");
-    if (!sm->create(1)) {
-        w.warnQuit();
-        a.quit();
-    }
 
     w.show();
     return a.exec();

@@ -38,7 +38,6 @@ public:
     void onTestDelay();
     void updateAutoConnect();
     void CheckAutoConnect();
-    void warnQuit();
 public slots:
     void onActivated(QSystemTrayIcon::ActivationReason reason);
     void onConnetChange();
