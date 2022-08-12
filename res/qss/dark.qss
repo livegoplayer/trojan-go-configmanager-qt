@@ -43,17 +43,18 @@ QDialog QPlainTextEdit
     font-weight: normal;
 }
 
-QTableView
+QTableWidget
 {
     background-color: rgb(37,40,45);
     border: 1px solid rgb(70,73,80);
+    font-size: 13px;
 }
 
-QTableView::item {
+QTableWidget::item {
     background-color: rgb(37,40,45);
 }
 
-QTableView::item:selected {
+QTableWidget::item:selected {
     background: rgb(22,24,26);
     color: rgb(255,255,255);
 }
@@ -128,6 +129,7 @@ QToolBar {
     background : rgb(22,24,26);
     border: 1px solid rgb(70,73,80);
     spacing: 35px;
+    padding: 35px;
 }
 
 #toolBar QToolButton {

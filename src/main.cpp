@@ -2,12 +2,14 @@
 
 #include <QApplication>
 #include <QLocale>
+#include <QMessageBox>
+#include <QSharedMemory>
 #include <QTranslator>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
+    MainWindow w;
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {
@@ -17,10 +19,13 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    MainWindow w;
+    static QSharedMemory *sm = new QSharedMemory("trojan-go-configmanager");
+    if (!sm->create(1)) {
+        w.warnQuit();
+        a.quit();
+    }
 
     w.show();
-    w.InitQuitAction(&a);
     return a.exec();
 }
 

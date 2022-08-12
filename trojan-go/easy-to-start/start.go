@@ -2,12 +2,17 @@ package main
 
 import (
 	"C"
+	"encoding/json"
 	"github.com/p4gefau1t/trojan-go/common"
 	"github.com/p4gefau1t/trojan-go/constant"
 	_ "github.com/p4gefau1t/trojan-go/easy"
 	"github.com/p4gefau1t/trojan-go/log"
+	_ "github.com/p4gefau1t/trojan-go/log"
+	_ "github.com/p4gefau1t/trojan-go/log/golog"
+	_ "github.com/p4gefau1t/trojan-go/log/golog/buffer"
+	_ "github.com/p4gefau1t/trojan-go/log/golog/colorful"
+	//_ "github.com/p4gefau1t/trojan-go/log/simplelog"
 	"github.com/p4gefau1t/trojan-go/proxy"
-	_ "github.com/p4gefau1t/trojan-go/proxy"
 	_ "github.com/p4gefau1t/trojan-go/proxy/client"
 	_ "github.com/p4gefau1t/trojan-go/proxy/custom"
 	_ "github.com/p4gefau1t/trojan-go/proxy/forward"
@@ -40,9 +45,9 @@ import (
 	_ "github.com/p4gefau1t/trojan-go/version"
 )
 
-// Start 移植了client运行的核心代码，在该项目中找不到可以主动停止的接口,所以抄过来了
-
 var P *proxy.Proxy
+
+// Start 移植了client运行的核心代码，在该项目中找不到可以主动停止的接口,所以抄过来了
 
 //export Start
 func Start(path string) {
@@ -76,7 +81,41 @@ func Stop() {
 	}
 }
 
-func main() {}
+//export ParseShareLinkToJsonFile
+func ParseShareLinkToJsonFile(shareLink, outputFilePath string) {
+
+	c := NewConfigByShareLink(shareLink)
+	data, err := json.Marshal(&c)
+
+	err = ioutil.WriteFile(outputFilePath, data, 0644)
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+////export ParseJsonFileToShareLink
+//func ParseJsonFileToShareLink(shareLink, path string) {
+//	data, isJSON, err := detectAndReadConfig(path)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	if !isJSON {
+//		log.Fatal(common.NewError("not json file"))
+//	}
+//
+//	cfg := UrlConfig{}
+//	err = json.Unmarshal(data, &cfg)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//}
+
+func main() {
+	//shareLink := "trojan://xjy84885390@www.k3s.shop:865#www.k3s.shop%3A865"
+	outputFilePath := "F:/projects/qt/build-trojan-go-desktop-Desktop_Qt_6_3_1_MinGW_64_bit-Debug/debug/config/config.json"
+	Start(outputFilePath)
+}
 
 func detectAndReadConfig(file string) ([]byte, bool, error) {
 	isJSON := false

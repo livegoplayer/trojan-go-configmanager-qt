@@ -7,7 +7,6 @@ EditTcpSettingsForm::EditTcpSettingsForm(QWidget *parent) :
     ui(new Ui::EditTcpSettingsForm)
 {
     ui->setupUi(this);
-    this->ConfigManager = new class ConfigManager();
 
     this->InitTCPConfigs();
     connect(ui->ok, &QPushButton::pressed, this, [=] () {
@@ -33,16 +32,16 @@ void EditTcpSettingsForm::SaveTCPConfigs() {
     bool no_delay = ui->no_delay->isChecked();
     bool keep_alive = ui->keep_alive->isChecked();
     bool prefer_ipv4 = ui->prefer_ipv4->isChecked();
-    QConfigJsonObject config = this->ConfigManager->GetConfigs();
+    QConfigJsonObject config = ConfigManager::GetConfigs();
     config.SetTCPConfigNoDelay(no_delay);
     config.SetTCPConfigKeepAlive(keep_alive);
     config.SetTCPPreferIpv4(prefer_ipv4);
 
-    this->ConfigManager->SaveConfig(config);
+    ConfigManager::SaveConfig(config);
 }
 
 void EditTcpSettingsForm::InitTCPConfigs() {
-    QConfigJsonObject config = this->ConfigManager->GetConfigs();
+    QConfigJsonObject config = ConfigManager::GetConfigs();
     bool no_delay = config.GetTCPConfigNoDelay();
     bool keep_alive = config.GetTCPConfigKeepAlive();
     bool prefer_ipv4 = config.GetTCPConfigPreferIpv4();

@@ -1,4 +1,5 @@
 #include "qconfigjsonobject.h"
+#include "qtrojangoclientconfigjsonobject.h"
 
 #include <QJsonArray>
 #include <QFile>
@@ -19,6 +20,18 @@ QConfigJsonObject::QConnectionConfigJsonObject* QConfigJsonObject::QConnectionCo
         SetLastUseTime(QConnectionConfigJsonObject::DEFAULT_LAST_USE_TIMME)->
         insert(sslKey, QConnectionConfigJsonObject::getDefaulSSLObj());
     return this;
+}
+
+QConfigJsonObject::QConnectionConfigJsonObject QConfigJsonObject::QConnectionConfigJsonObject::NewFromClientConfigJson(QTrojanGoClientConfigJsonObject *ConfigJsonObject) {
+    QConfigJsonObject::QConnectionConfigJsonObject *newObj = new QConfigJsonObject::QConnectionConfigJsonObject();
+    newObj->SetServerAddr(ConfigJsonObject->GetRemoteAddr())->
+            SetServerPort(ConfigJsonObject->GetRemotePort());
+    if (ConfigJsonObject->GetPasswordList().size() > 0){
+        newObj->SetPassword(ConfigJsonObject->GetPasswordList().at(0).toString());
+    }
+
+    newObj->SetSSLConfigSni(ConfigJsonObject->GetSSLConfigSni());
+    return *newObj;
 }
 
 // 内部类的操作方法
@@ -479,6 +492,8 @@ QConfigJsonObject QConfigJsonObject::GetDefaulObj() {
     obj->insert(logFileKey, DEFAULT_LOG_FILE_PATH);
     obj->insert(disableHttpCheckKey, DEFAULT_DISABLE_HTTP_CHECK);
     obj->insert(udpTimeoutKey, DEFAULT_DISABLE_HTTP_CHECK);
+    obj->insert(themeKey, DEFAULT_THEME);
+    obj->insert(hideCloseKey, DEFAULT_HIDE_CLOSE);
     obj->insert(tcpKey, getDefaulTcpObj());
     obj->insert(muxKey, getDefaulMuxObj());
     obj->insert(routerKey, getDefaultRouterObj());
@@ -870,6 +885,35 @@ QConfigJsonObject* QConfigJsonObject::SetTheme(int value){
     return this;
 }
 
+bool QConfigJsonObject::GetHideClose(){
+    if(this->contains(hideCloseKey))
+    {
+        QJsonValue config = this->value(hideCloseKey);
+        return config.toBool();
+    }
+    return DEFAULT_HIDE_CLOSE;
+}
+
+bool QConfigJsonObject::GetAutoConnect(){
+    if(this->contains(autoConnectKey))
+    {
+        QJsonValue config = this->value(autoConnectKey);
+        return config.toBool();
+    }
+    return DEFAULT_AUTO_CONNECT;
+}
+
+QConfigJsonObject* QConfigJsonObject::SetAutoConnect(bool value){
+    this->insert(autoConnectKey, value);
+    return this;
+}
+
+QConfigJsonObject* QConfigJsonObject::SetHideClose(bool value){
+    this->insert(hideCloseKey, value);
+    return this;
+}
+
+
 QString QConfigJsonObject::GetLogFilePath(){
     if(this->contains(logFileKey))
     {
@@ -963,6 +1007,17 @@ QConfigJsonObject *QConfigJsonObject::EditConnectionConfig(int Index, QConnectio
     return this;
 }
 
+QConfigJsonObject *QConfigJsonObject::SetLastDelayTime(int Index, int lastDelayTime)
+{
+    QConnectionConfigListJsonObject array = this->GetConnectionList();
+    // 这里有两个键单独控制的
+    QConnectionConfigJsonObject old = array.At(Index);
+    old.SetLastDelay(lastDelayTime);
+    array.replace(Index, QJsonValue(old));
+    this->insert(connectionListKey, array);
+    return this;
+}
+
 QConfigJsonObject* QConfigJsonObject::DelConnectionConfig(int index)
 {
     QConnectionConfigListJsonObject array = this->GetConnectionList();
@@ -982,6 +1037,23 @@ QConfigJsonObject* QConfigJsonObject::UpConnectionConfig(int index)
 
     array.replace(index, array.at(index-1));
     array.replace(index-1, nowObj);
+
+    this->insert(connectionListKey, array);
+
+    return this;
+}
+
+QConfigJsonObject* QConfigJsonObject::DownConnectionConfig(int index)
+{
+
+    QJsonArray array = this->GetConnectionList();
+    if (index>=array.count()-1) {
+        return 0;
+    }
+    QJsonValue nowObj = array.at(index);
+
+    array.replace(index, array.at(index+1));
+    array.replace(index+1, nowObj);
 
     this->insert(connectionListKey, array);
 

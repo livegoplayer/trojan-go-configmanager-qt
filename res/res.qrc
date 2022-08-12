@@ -1,18 +1,29 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/download.svg</file>
-        <file>icons/network-connect.svg</file>
-        <file>icons/network-disconnect.svg</file>
-        <file>icons/network-test.svg</file>
-        <file>icons/profile-delete.svg</file>
-        <file>icons/profile-down.svg</file>
-        <file>icons/profile-edit.svg</file>
-        <file>icons/profile-share.svg</file>
-        <file>icons/profile-up.svg</file>
         <file>icons/README.md</file>
         <file>icons/trojan_off.png</file>
         <file>icons/trojan_on.png</file>
         <file>icons/upload.svg</file>
         <file>icons/vmess_off.png</file>
+        <file>icons/network-connect.png</file>
+        <file>icons/network-connect-disabled.png</file>
+        <file>icons/network-delete.png</file>
+        <file>icons/network-delete-disabled.png</file>
+        <file>icons/network-disconnect.png</file>
+        <file>icons/network-disconnect-disabled.png</file>
+        <file>icons/network-test.png</file>
+        <file>icons/network-test-disabled.png</file>
+        <file>icons/profile-down.png</file>
+        <file>icons/profile-down-disabled.png</file>
+        <file>icons/profile-edit.png</file>
+        <file>icons/profile-edit-disabled.png</file>
+        <file>icons/profile-share.png</file>
+        <file>icons/profile-share-disabled.png</file>
+        <file>icons/profile-up.png</file>
+        <file>icons/profile-up-disabled.png</file>
+        <file>icons/ss_off.png</file>
+        <file>icons/tumblr-line.ico</file>
     </qresource>
+    <qresource prefix="/new/prefix1"/>
 </RCC>

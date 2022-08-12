@@ -1,0 +1,5 @@
+[INFO]  2022/08/11 19:43:38 adapter listening on tcp/udp: 127.0.0.1:8880
+[WARN]  2022/08/11 19:43:38 tls sni is unspecified
+[INFO]  2022/08/11 19:43:38 cert is unspecified, using default ca list
+[ERROR] 2022/08/11 19:43:38 github.com/p4gefau1t/trojan-go/tunnel/router.NewClient:client.go:346 open C:\Users\bug\AppData\Local\Temp\GoLand\dat\geosite.dat: The system cannot find the path specified.
+[INFO]  2022/08/11 19:43:38 router client created

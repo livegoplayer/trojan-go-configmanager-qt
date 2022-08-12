@@ -4,11 +4,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
+RC_ICONS= ".\\res\\icons\\tumblr-line.ico"
+
 # You can make your code fail to compile if it uses deprecated APIs.
-# In order to do so, uncomment the following line.
+# In order to do so, uncomment the followings line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/network/networkhelper.cpp \
     src/theme/qthemeconfig.cpp \
     src/ui/additemdialog.cpp \
     src/ui/advancedsettingsform.cpp \
@@ -27,6 +30,7 @@ SOURCES += \
     src/trojan/trojangomanger.cpp
 
 HEADERS += \
+    src/network/networkhelper.h \
     src/theme/qthemeconfig.h \
     src/ui/additemdialog.h \
     src/ui/advancedsettingsform.h \
@@ -64,8 +68,6 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
-
 INCLUDEPATH += $$PWD/.
 DEPENDPATH += $$PWD/.
 
@@ -77,7 +79,12 @@ win32: LIBS += -lwininet
 
 win32: LIBS += -lrasapi32
 
+
+
 win32: LIBS += -L$$PWD/lib/windows/ -ltrojan-go-start
 
 INCLUDEPATH += $$PWD/lib/windows
 DEPENDPATH += $$PWD/lib/windows
+
+DISTFILES += \
+    appicon.rc

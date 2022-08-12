@@ -22,13 +22,9 @@ public:
     ~ConnectionList();
 
     int RefleshConnectionList();
-    void RefleshItem(int row, int col, QString val);
-
 
     void ClearRows();
 
-    // 配置管理组件
-    ConfigManager *ConfigManager;
 
 //    // 配置编辑组件
     ConnectionForm *widgetNew;
@@ -50,13 +46,19 @@ public:
     QConfigJsonObject::QConnectionConfigJsonObject GetConnectedItem();
     int DisConnect();
     int Connect();
+    void DownSelectedRow();
+    void SetConnectedIndex(int index);
+    int getConnectedIndex();
+    int getRowCount();
+
+    QConfigJsonObject::QConnectionConfigJsonObject GetSelectedRowItem();
+    void SetDelayTested(int index, int delaytime);
+    int ReConnect();
+    void SetLastConnectedIndex(int index);
+    int ConnectTo(int index);
 private:
     Ui::ConnectionList *ui;
 
-    int getConnectedIndex(int index);
-
-
-    int getRowCount();
 
     void setItem(int row, int column, QTableWidgetItem *item);
 
@@ -70,15 +72,17 @@ private:
     int usedHistoryIndex;
     int lastUseTimeIndex;
 
-    int getConnectedIndex();
-
     QString getConnectedIndexText(int nowIndex);
 
     void setHeaders(QStringList list);
-
-public slots:
-
     void UpdateConnectionList();
+
+
+
+signals:
+    void connectionUpdated();
+    void requestConnect();
+    void requestDisconnect();
 };
 
 

@@ -19,10 +19,11 @@ public:
     void applyDarkPalette();
     void applyDarkQss();
 
-    ConfigManager *ConfigManager;
     bool isLightTheme();
     void setTheme(int theme);
     void updateTheme();
+    void SetDrakTheme();
+    void SetLightTheme();
 signals:
 
 };

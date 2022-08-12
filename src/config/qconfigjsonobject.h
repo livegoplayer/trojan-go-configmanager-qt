@@ -1,6 +1,8 @@
 #ifndef QCONFIGJSONOBJECT_H
 #define QCONFIGJSONOBJECT_H
 
+#include "src/config/qtrojangoclientconfigjsonobject.h"
+
 #include <QJsonObject>
 #include <qjsonarray.h>
 
@@ -23,6 +25,8 @@ public:
     constexpr static const char DEFAULT_LOG_FILE_PATH[] = "./client.log"; // 未指定则使用标准输出
     static const bool DEFAULT_DISABLE_HTTP_CHECK = false;
     static const int DEFAULT_UDP_TIMMEOUT = 60;
+    static const bool DEFAULT_HIDE_CLOSE = true;
+    static const bool DEFAULT_AUTO_CONNECT = false;
 
     // Theme
     static const int THEME_LIGHT = 0;
@@ -47,8 +51,8 @@ public:
 
     constexpr static const char DEFAULT_ROUTER_DEFALUT_POLICY[] = "proxy";
     constexpr static const char DEFAULT_ROUTER_DOMAIN_STRATEGY[] = "as_is";
-    constexpr static const char DEFAULT_ROUTER_GEOIP[] = "$PROGRAM_DIR$/geoip.dat";
-    constexpr static const char DEFAULT_ROUTER_GEOSITE[] = "$PROGRAM_DIR$/geosite.dat";
+    constexpr static const char DEFAULT_ROUTER_GEOIP[] = "./dat/geoip.dat";
+    constexpr static const char DEFAULT_ROUTER_GEOSITE[] = "./dat/geosite.dat";
 
     QConfigJsonObject();
     constexpr static const char connectionListKey[] = "connection_list";
@@ -66,6 +70,12 @@ public:
 
     // theme
     constexpr static const char themeKey[] = "theme";
+
+    // hide when close
+    constexpr static const char hideCloseKey[] = "hide_close";
+
+    // autoconnect when open
+    constexpr static const char autoConnectKey[] = "auto_connect";
 
 
     // router配置
@@ -199,6 +209,7 @@ public:
         QConnectionConfigJsonObject();
         QConfigJsonObject::QConnectionConfigJsonObject *SetSSLConfigCipher(QString val);
         QString GetSSLConfigCipher();
+        static QConfigJsonObject::QConnectionConfigJsonObject NewFromClientConfigJson(QTrojanGoClientConfigJsonObject *ConfigJsonObject);
     private:
         QConfigJsonObject::QConnectionConfigJsonObject *init();
 
@@ -280,6 +291,12 @@ public:
     QConfigJsonObject *AddConnectionConfig(QConnectionConfigJsonObject obj);
     QConfigJsonObject *SetTheme(int value);
     int GetTheme();
+    QConfigJsonObject *DownConnectionConfig(int index);
+    bool GetHideClose();
+    QConfigJsonObject *SetHideClose(bool value);
+    QConfigJsonObject *SetLastDelayTime(int Index, int lastDelayTime);
+    QConfigJsonObject *SetAutoConnect(bool value);
+    bool GetAutoConnect();
 private:
     static bool confirmFile(QString sFile);
 };

@@ -11,6 +11,8 @@ public:
     void Disconnet();
     TrojanGoManger(QString configPath);
     ~TrojanGoManger();
+    static GoString ToGoString(QString str);
+    static void parseShareLink(QString shareLink, QString outPutPath);
 protected:
     void run();
 private:

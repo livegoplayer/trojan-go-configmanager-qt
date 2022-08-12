@@ -92,17 +92,17 @@
    </column>
    <column>
     <property name="text">
-     <string>本期用量</string>
+     <string>nothing</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>累计用量</string>
+     <string>nothing</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string notr="true">重置日期</string>
+     <string notr="true">nothing</string>
     </property>
     <property name="font">
      <font>
@@ -112,7 +112,7 @@
    </column>
    <column>
     <property name="text">
-     <string>上次使用</string>
+     <string>nothing</string>
     </property>
    </column>
   </widget>

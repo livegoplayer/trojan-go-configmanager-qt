@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "src/network/networkhelper.h"
 #include "src/theme/qthemeconfig.h"
 #include "src/ui/advancedsettingsform.h"
 #include <QSystemTrayIcon>
@@ -21,7 +22,6 @@ public:
     QSystemTrayIcon *QSystemTrayIcon;
     QThemeConfig *QThemeConfig;
 
-
     // 惟独这一个action不能出现在ui中
     QAction *showAction;
     QAction *minAction;
@@ -29,15 +29,27 @@ public:
 
     int AddConnection();
     int RefleshConnectionList();
-    void InitQuitAction(QApplication *a);
     void closeEvent(QCloseEvent *event);
-    bool eventFilter(QObject *watched, QEvent *event);
+    void updateThemeAction();
+    void updateTheme();
+    void updateHideClose();
+    void reflashActions(int row);
+    void onConnect();
+    void onTestDelay();
+    void updateAutoConnect();
+    void CheckAutoConnect();
+    void warnQuit();
 public slots:
     void onActivated(QSystemTrayIcon::ActivationReason reason);
+    void onConnetChange();
+    void onDisconnect();
+protected slots:
+    void onReconnect();
 private:
     Ui::MainWindow *ui;
     bool confirmFile(QString path);
 
     AdvancedSettingsForm *advancedSettingsForm;
+    void initTheme();
 };
 #endif // MAINWINDOW_H;

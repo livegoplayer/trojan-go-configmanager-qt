@@ -17,8 +17,6 @@ class AdvancedSettingsForm : public QDialog
 public:
     explicit AdvancedSettingsForm(QWidget *parent = nullptr);
     ~AdvancedSettingsForm();
-    // 配置管理组件
-    ConfigManager *ConfigManager;
     // 编辑规则的组件
     RuleListEdit *RuleListEditDialog;
     // 编辑mux配置的组件
@@ -31,6 +29,8 @@ public:
     void InitRuleEditFoemByType(int type);
 private:
     Ui::AdvancedSettingsForm *ui;
+signals:
+    void requestReconnect();
 };
 
 #endif // ADVANCEDSETTINGSFORM_H

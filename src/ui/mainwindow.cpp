@@ -6,8 +6,9 @@
 #include <QNetwork.h>
 #include <QPushButton>
 #include <QSystemTrayIcon>
-#include <QMessageBox>
 #include <QCloseEvent>
+#include <QClipboard>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,16 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     this->advancedSettingsForm = new AdvancedSettingsForm();
     this->QThemeConfig = new class QThemeConfig();
-    this->QThemeConfig->updateTheme();
-
-    ui->ActionConnect->installEventFilter(this);
-    ui->ActionDisconnect->installEventFilter(this);
-    ui->ActionTestDelay->installEventFilter(this);
-    ui->ActionEdit->installEventFilter(this);
-    ui->ActionDel->installEventFilter(this);
-    ui->ActionShare->installEventFilter(this);
-    ui->ActionUp->installEventFilter(this);
-    ui->ActionDown->installEventFilter(this);
+    this->updateTheme();
+    this->updateHideClose();
+    this->updateAutoConnect();
+    this->reflashActions(-1);
 
     Qt::WindowFlags windowFlag  = Qt::Dialog;
     windowFlag                  |= Qt::WindowMinimizeButtonHint;
@@ -66,13 +61,19 @@ MainWindow::MainWindow(QWidget *parent)
             ui->CL->DelSelectedRow();
     });
 
+    connect(ui->ActionDown,
+            &QAction::triggered,
+            this,
+            [=] () {
+            ui->CL->DownSelectedRow();
+    });
+
     connect(ui->ActionUp,
             &QAction::triggered,
             this,
             [=] () {
             ui->CL->UpSelectedRow();
     });
-
 
     connect(ui->ActionAdditionalSettings,
             &QAction::triggered,
@@ -86,24 +87,14 @@ MainWindow::MainWindow(QWidget *parent)
             &QAction::triggered,
             this,
             [=] () {
-            this->QSystemTrayIcon->setIcon(QIcon(":/icons/trojan_on"));
-            int index = ui->CL->Connect();
-            QString name = ui->CL->ConfigManager->GetConnectionConfigItem(index).GetName();
-            this->QSystemTrayIcon->showMessage("conneted", name + "已连接");
+            this->onConnect();
     });
 
     connect(ui->ActionDisconnect,
             &QAction::triggered,
             this,
             [=] () {
-            this->QSystemTrayIcon->setIcon(QIcon(":/icons/trojan_off"));
-            int index = ui->CL->DisConnect();
-            if (index > -1)  {
-                QString name = ui->CL->ConfigManager->GetConnectionConfigItem(index).GetName();
-                this->QSystemTrayIcon->showMessage("disconneted", name + "已断开");
-            }else{
-                this->QSystemTrayIcon->showMessage("错误", "没有活动连接");
-            }
+            this->onDisconnect();
     });
 
     connect(this->showAction,
@@ -129,14 +120,58 @@ MainWindow::MainWindow(QWidget *parent)
             this->showMaximized();
     });
 
+    connect(ui->actionlight,
+            &QAction::triggered,
+            this,
+            [=] () {
+            this->QThemeConfig->SetLightTheme();
+            this->updateTheme();
+    });
+
+    connect(ui->actiondark,
+            &QAction::triggered,
+            this,
+            [=] () {
+            this->QThemeConfig->SetDrakTheme();
+            this->updateTheme();
+    });
+
+    connect(ui->actionHideClose,
+            &QAction::triggered,
+            this,
+            [=] (bool checked) {
+            ConfigManager::SetHideClose(checked);
+            this->updateHideClose();
+    });
+
+    connect(ui->actionAutoConnect,
+            &QAction::triggered,
+            this,
+            [=] (bool checked) {
+            ConfigManager::SetAutoConnect(checked);
+            this->updateAutoConnect();
+    });
+
+    connect(ui->ActionTestDelay,
+            &QAction::triggered,
+            this,
+            &MainWindow::onTestDelay)
+    ;
+
+    connect(ui->ActionTrojanLog,
+            &QAction::triggered,
+            this,
+            [=] () {
+            ConfigManager::openLogFileDialog();
+    });
+
+    connect(ui->CL, &ConnectionList::connectionUpdated, this, &MainWindow::onConnetChange);
+
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         this->QSystemTrayIcon = new class QSystemTrayIcon(this);
         TrayMenu *pTrayMenu = new TrayMenu(this);
         pTrayMenu->addAction(this->showAction);
         pTrayMenu->addAction(this->minAction);
-        pTrayMenu->addSeparator();
-        pTrayMenu->addAction(ui->ActionConnect);
-        pTrayMenu->addAction(ui->ActionDisconnect);
         pTrayMenu->addSeparator();
         pTrayMenu->addAction(ui->ActionQuit);
         this->QSystemTrayIcon->setContextMenu(pTrayMenu);
@@ -146,23 +181,48 @@ MainWindow::MainWindow(QWidget *parent)
 
         this->QSystemTrayIcon->show();
         connect(this->QSystemTrayIcon , SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(onActivated(QSystemTrayIcon::ActivationReason)));
-
     }
-}
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
+    connect(ui->CL, &ConnectionList::requestConnect, this, &MainWindow::onConnect);
+    connect(ui->CL, &ConnectionList::requestDisconnect, this, &MainWindow::onDisconnect);
 
-void MainWindow::InitQuitAction(QApplication *a) {
     connect(ui->ActionQuit,
             &QAction::triggered,
             this,
             [=] () {
             ui->CL->DisConnect();
-            a->quit();
+            QApplication::quit();
     });
+
+    connect(this->advancedSettingsForm,
+            &AdvancedSettingsForm::requestReconnect,
+            this,
+            &MainWindow::onReconnect);
+
+    connect(ui->ActionImportFromClipboard,
+            &QAction::triggered,
+            this,
+            [=] () {
+        QClipboard *br = QApplication::clipboard();
+        QString original =   br->text();
+        if (original.startsWith("trojan")) {
+            if (!original.startsWith("trojan-go")) {
+                original.replace("trojan://", "trojan-go://");
+            }
+            ConfigManager::addConnectionFromShareLink(original);
+            ui->CL->RefleshConnectionList();
+        }else{
+           QMessageBox::warning(this, "提示", "不是有效的分享链接");
+        }
+    });
+
+    this->CheckAutoConnect();
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
 }
 
 // 激活系统托盘
@@ -190,8 +250,8 @@ void MainWindow::onActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    int closeApp = QMessageBox::question(this, "Note", "你想要最小化到托盘吗?");
-    if(closeApp == QMessageBox::Yes)
+    bool hideClose = ConfigManager::GetHideClose();
+    if(hideClose)
     {
         this->hide();
         event->ignore();
@@ -203,5 +263,137 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
+void MainWindow::CheckAutoConnect()
+{
+    if (ConfigManager::GetAutoConnect()) {
+        this->onConnect();
+    }
+}
+
+
+
+void MainWindow::updateTheme()
+{
+    this->QThemeConfig->updateTheme();
+    this->updateThemeAction();
+}
+
+void MainWindow::updateHideClose()
+{
+    bool HideClose = ConfigManager::GetHideClose();
+    ui->actionHideClose->setChecked(HideClose);
+}
+
+
+void MainWindow::updateAutoConnect()
+{
+    bool value = ConfigManager::GetAutoConnect();
+    ui->actionAutoConnect->setChecked(value);
+}
+
+
+void MainWindow::updateThemeAction() {
+    if (this->QThemeConfig->isDarkTheme()){
+        ui->actiondark->setChecked(true);
+        ui->actionlight->setChecked(false);
+    }else{
+        ui->actiondark->setChecked(false);
+        ui->actionlight->setChecked(true);
+    }
+}
+
+void MainWindow::onConnetChange(){
+    this->reflashActions(ui->CL->GetSelectedRowNum());
+}
+
+void MainWindow::onDisconnect(){
+    this->QSystemTrayIcon->setIcon(QIcon(":/icons/trojan_off"));
+    int index = ui->CL->DisConnect();
+    if (index > -1)  {
+        QString name = ConfigManager::GetConnectionConfigItem(index).GetName();
+        this->QSystemTrayIcon->showMessage("disconneted", name + "已断开");
+    }else{
+        this->QSystemTrayIcon->showMessage("错误", "没有活动连接");
+    }
+}
+
+void MainWindow::onConnect(){
+    if (!ConfigManager::GetConnectionConfigList().isEmpty()) {
+
+        this->QSystemTrayIcon->setIcon(QIcon(":/icons/trojan_on"));
+        int index = ui->CL->Connect();
+        QString name = ConfigManager::GetConnectionConfigItem(index).GetName();
+        this->QSystemTrayIcon->showMessage("conneted", name + "已连接");
+    }else{
+        this->QSystemTrayIcon->showMessage("错误", "请先添加配置");
+    }
+}
+
+void MainWindow::onTestDelay(){
+    int rowNum = ui->CL->GetSelectedRowNum();
+    if (rowNum == -1) { // 测试所有的延迟
+//        for (int i = 0; i< ui->CL->getRowCount(); i++){
+//            int delay = NetworkHelper::Ping(ConfigManager::GetConnectionConfigItem(i).GetName());
+//            ui->CL->SetDelayTested(i, delay);
+//        }
+        return;
+    }
+    int delay = NetworkHelper::Ping(ConfigManager::GetConnectionConfigItem(rowNum).GetServerAddr());
+    ui->CL->SetDelayTested(rowNum, delay);
+}
+
+void MainWindow::onReconnect(){
+    if (!ConfigManager::GetConnectionConfigList().isEmpty()) {
+        this->QSystemTrayIcon->setIcon(QIcon(":/icons/trojan_on"));
+        int index = ui->CL->ReConnect();
+        QString name = ConfigManager::GetConnectionConfigItem(index).GetName();
+        this->QSystemTrayIcon->showMessage("conneted", name + "重新连接成功");
+    }else{
+        this->QSystemTrayIcon->showMessage("错误", "请先添加配置");
+    }
+}
+
+void MainWindow::reflashActions(int row){
+    if (row == -1) {
+        ui->ActionTestDelay->setDisabled(true);
+        ui->ActionEdit->setDisabled(true);
+        ui->ActionDel->setDisabled(true);
+        ui->ActionShare->setDisabled(true);
+        ui->ActionUp->setDisabled(true);
+        ui->ActionDown->setDisabled(true);
+        ui->ActionConnect->setDisabled(true);
+        ui->ActionDisconnect->setDisabled(true);
+        return;
+    }
+
+    ui->ActionTestDelay->setEnabled(true);
+    ui->ActionEdit->setEnabled(true);
+    ui->ActionDel->setEnabled(true);
+    ui->ActionShare->setEnabled(true);
+
+    if (row > 0) {
+        ui->ActionUp->setEnabled(true);
+    }else{
+        ui->ActionUp->setDisabled(true);
+    }
+
+    if (row < ui->CL->getRowCount() - 1) {
+        ui->ActionDown->setEnabled(true);
+    }else{
+        ui->ActionDown->setDisabled(true);
+    }
+
+    if (row == ui->CL->getConnectedIndex()){
+        ui->ActionConnect->setDisabled(true);
+        ui->ActionDisconnect->setEnabled(true);
+    }else{
+        ui->ActionConnect->setEnabled(true);
+        ui->ActionDisconnect->setDisabled(true);
+    }
+}
+
+void MainWindow::warnQuit(){
+    QMessageBox::warning(this, "提示", "不是有效的分享链接");
+}
 
 

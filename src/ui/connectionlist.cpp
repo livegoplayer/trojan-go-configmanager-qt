@@ -9,15 +9,17 @@
 #include <QJsonArray>
 #include <QTableWidget>
 #include <QPushButton>
+#include <QFont>
+
+#include <src/network/networkhelper.h>
 
 ConnectionList::ConnectionList(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ConnectionList)
 {
     ui->setupUi(this);
-    this->ConfigManager = new class ConfigManager();
     this->widgetNew = new ConnectionForm(0, ConnectionForm::STATUS_NEW);
-    this->connnectedRowIndex = -1;
+    SetConnectedIndex(-1);
     this->SystemProxyManager = new class SystemProxyManager();
     int col = 0;
     this->nameIndex = col++;
@@ -27,11 +29,10 @@ ConnectionList::ConnectionList(QWidget *parent) :
     this->usedIndex = col++;
     this->usedHistoryIndex = col++;
     this->lastUseTimeIndex = col++;
-    this->TrojanGoManger = new class TrojanGoManger(this->ConfigManager->GetClientConfigPath());
+    this->TrojanGoManger = new class TrojanGoManger(ConfigManager::GetClientConfigPath());
+    this->SetConnectedIndex(-1);
 
     this->RefleshConnectionList();
-
-    connect(this->ConfigManager, &ConfigManager::configFileUpdated, this, &ConnectionList::UpdateConnectionList);
 
     connect(this->widgetNew->findChild<QPushButton*>("ok"),
             &QPushButton::pressed,
@@ -41,15 +42,32 @@ ConnectionList::ConnectionList(QWidget *parent) :
             QConfigJsonObject::QConnectionConfigJsonObject obj = this->widgetNew->GetFormSettings();
             // 新建操作
             if (this->widgetNew->GetFormStatus() == ConnectionForm::STATUS_NEW) {
-                this->ConfigManager->AddConnectionConfig(obj);
+                ConfigManager::AddConnectionConfig(obj);
+                this->UpdateConnectionList();
             }
 
             // 编辑操作
             if (this->widgetNew->GetFormStatus() == ConnectionForm::STATUS_EDIT) {
-                this->ConfigManager->EditConnectionConfig(this->widgetNew->GetItemIndex(), obj);
+                ConfigManager::EditConnectionConfig(this->widgetNew->GetItemIndex(), obj);
+                this->UpdateConnectionList();
             }
             this->widgetNew->hide();
     });
+
+    connect(ui->ConnectionListTable, &QTableWidget::itemSelectionChanged, this, [=] () {
+        emit this->connectionUpdated();
+    });
+
+    connect(ui->ConnectionListTable, &QTableWidget::cellDoubleClicked, this, [=] (int row) {
+        if (this->getConnectedIndex() == row) {
+            emit this->requestDisconnect();
+        }else{
+            emit this->requestConnect();
+        }
+    });
+
+
+
 }
 
 ConnectionList::~ConnectionList()
@@ -69,7 +87,7 @@ void ConnectionList::setHeaders(QStringList list)
 
 int ConnectionList::RefleshConnectionList()
 {
-    QConfigJsonObject::QConnectionConfigListJsonObject array = this->ConfigManager->GetConnectionConfigList();
+    QConfigJsonObject::QConnectionConfigListJsonObject array = ConfigManager::GetConnectionConfigList();
     // 清空所有item 从文件读取
     this->ClearRows();
     for (int i=0 ; i< array.size(); i++) {
@@ -86,23 +104,57 @@ int ConnectionList::RefleshConnectionList()
     return 0;
 }
 
-void ConnectionList::RefleshItem(int row, int col, QString val)
-{
-    this->setItem(row, col, new QTableWidgetItem(val));
-}
 
 int ConnectionList::AddConnection(QString name, QString server, QString status, int lastDelayTime, int used, int usedHistory, int lastUseTime)
 {
     int i = this->getRowCount();
     // 添加一个item并且渲染
     this->ui->ConnectionListTable->setRowCount(i+1);
-    this->setItem(i, nameIndex, new QTableWidgetItem(name));
-    this->setItem(i, serverIndex, new QTableWidgetItem(server));
-    this->setItem(i, statusIndex, new QTableWidgetItem(status));
-    this->setItem(i, lastDelayTimeIndex, new QTableWidgetItem(lastDelayTime));
-    this->setItem(i, usedIndex, new QTableWidgetItem(used));
-    this->setItem(i, usedHistoryIndex, new QTableWidgetItem(usedHistory));
-    this->setItem(i, lastUseTimeIndex, new QTableWidgetItem(lastUseTime));
+    QTableWidgetItem *nameItem = new QTableWidgetItem(name);
+    QTableWidgetItem *serverItem = new QTableWidgetItem(server);
+    QTableWidgetItem *statusItem = new QTableWidgetItem(status);
+    QTableWidgetItem *lastDelayTimeItem = new QTableWidgetItem(lastDelayTime);
+    QTableWidgetItem *usedItem = new QTableWidgetItem(used);
+    QTableWidgetItem *usedHistoryItem = new QTableWidgetItem(usedHistory);
+    QTableWidgetItem *lastUseTimeItem = new QTableWidgetItem(lastUseTime);
+
+    if (i == getConnectedIndex()){
+        QFont *font = new QFont();
+        font->setBold(true);
+        nameItem->setFont(*font);
+        serverItem->setFont(*font);
+        statusItem->setFont(*font);
+        lastDelayTimeItem->setFont(*font);
+        usedItem->setFont(*font);
+        usedHistoryItem->setFont(*font);
+        lastUseTimeItem->setFont(*font);
+
+        QBrush ConnectedColor(Qt::green);
+        statusItem->setForeground(ConnectedColor);
+
+    }else{
+        QBrush DisconnectedColor(Qt::gray);
+        statusItem->setForeground(DisconnectedColor);
+    }
+
+    QBrush lastDelayTimeColor(Qt::green);
+
+    if (lastDelayTime > 0) {
+        lastDelayTimeColor.setColor(Qt::green);
+        lastDelayTimeItem->setText(QString::number(lastDelayTime) + " ms");
+    }else{
+        lastDelayTimeColor.setColor(Qt::red);
+        lastDelayTimeItem->setText("未知");
+    }
+    lastDelayTimeItem->setForeground(lastDelayTimeColor);
+
+    this->setItem(i, nameIndex, nameItem);
+    this->setItem(i, serverIndex, serverItem);
+    this->setItem(i, statusIndex, statusItem);
+    this->setItem(i, lastDelayTimeIndex, lastDelayTimeItem);
+    this->setItem(i, usedIndex, usedItem);
+    this->setItem(i, usedHistoryIndex, usedHistoryItem);
+    this->setItem(i, lastUseTimeIndex, lastUseTimeItem);
     return 0;
 }
 
@@ -120,39 +172,61 @@ void ConnectionList::ClearRows()
 int ConnectionList::Connect()
 {
     int index = this->GetSelectedRowNum();
+    return this->ConnectTo(index);
+}
+
+int ConnectionList::ConnectTo(int index)
+{
     if (index == -1) {
-        index = this->ConfigManager->GetConfigs().GetLastConnectItem();
+        index = ConfigManager::GetConfigs().GetLastConnectItem();
     }
     if (index == -1) {
         index = 0;
     }
-    this->ConfigManager->CreateClientConfigByItemIndex(this->GetSelectedRowNum());
+    ConfigManager::CreateClientConfigByItemIndex(index);
     this->TrojanGoManger->start();
-    this->connnectedRowIndex = index;
-    this->RefleshItem(index, this->statusIndex, this->getConnectedIndexText(index));
-    this->SystemProxyManager->SetProxy(this->ConfigManager->GetConfigs().GetLocalAddr(), this->ConfigManager->GetConfigs().GetLocalPort());
+    this->SetConnectedIndex(index);
+    RefleshConnectionList();
+    emit this->connectionUpdated();
+    ui->ConnectionListTable->setCurrentCell(index, 0);
+    this->SystemProxyManager->SetProxy(ConfigManager::GetConfigs().GetLocalAddr(), ConfigManager::GetConfigs().GetLocalPort());
+    this->SetLastConnectedIndex(index);
     return index;
 }
 
+int ConnectionList::ReConnect()
+{
+    int index = this->getConnectedIndex();
+    this->DisConnect();
+    return this->ConnectTo(index);
+}
+
 QConfigJsonObject::QConnectionConfigJsonObject ConnectionList::GetConnectedItem() {
-    return this->ConfigManager->GetConnectionConfigItem(this->connnectedRowIndex);
+    return ConfigManager::GetConnectionConfigItem(this->connnectedRowIndex);
 }
 
 int ConnectionList::DisConnect()
 {
     int index = this->getConnectedIndex();
     if (index > -1) {
-        this->connnectedRowIndex = -1;
+        SetConnectedIndex(-1);
         this->TrojanGoManger->Disconnet();
-        this->RefleshItem(index, this->statusIndex, this->getConnectedIndexText(index));
+        RefleshConnectionList();
     }
     this->SystemProxyManager->ReSetProxy();
+    ui->ConnectionListTable->setCurrentCell(index, 0);
+    emit this->connectionUpdated();
     return index;
 }
 
 int ConnectionList::getConnectedIndex()
 {
     return this->connnectedRowIndex;
+}
+
+void ConnectionList::SetConnectedIndex(int index)
+{
+    this->connnectedRowIndex = index;
 }
 
 int ConnectionList::GetSelectedRowNum()
@@ -166,6 +240,12 @@ int ConnectionList::GetSelectedRowNum()
     return -1;
 }
 
+
+QConfigJsonObject::QConnectionConfigJsonObject ConnectionList::GetSelectedRowItem()
+{
+    return ConfigManager::GetConnectionConfigItem(GetSelectedRowNum());
+}
+
 void ConnectionList::DelSelectedRow()
 {
     if (this->getRowCount() == 0) {
@@ -175,7 +255,8 @@ void ConnectionList::DelSelectedRow()
     if (rowNum == -1) {
         return;
     }
-    this->ConfigManager->DelConnectionConfig(rowNum);
+    ConfigManager::DelConnectionConfig(rowNum);
+    this->UpdateConnectionList();
 }
 
 
@@ -188,8 +269,25 @@ void ConnectionList::UpSelectedRow()
     if (rowNum == -1) {
         return;
     }
-    this->ConfigManager->UpConnectionConfig(rowNum);
+    ConfigManager::UpConnectionConfig(rowNum);
+    this->UpdateConnectionList();
+    ConfigManager::UpConnectionConfig(rowNum);
 }
+
+void ConnectionList::DownSelectedRow()
+{
+    if (this->getRowCount() == 0) {
+        return;
+    }
+    int rowNum = this->GetSelectedRowNum();
+    if (rowNum == -1) {
+        return;
+    }
+    ConfigManager::DownConnectionConfig(rowNum);
+    this->UpdateConnectionList();
+    ConfigManager::DownConnectionConfig(rowNum);
+}
+
 
 void ConnectionList::SetWidgetSelectedLine()
 {
@@ -198,22 +296,33 @@ void ConnectionList::SetWidgetSelectedLine()
         return;
     }
 
-    QConfigJsonObject::QConnectionConfigJsonObject obj = this->ConfigManager->GetConnectionConfigItem(rowNum);
+    QConfigJsonObject::QConnectionConfigJsonObject obj = ConfigManager::GetConnectionConfigItem(rowNum);
     this->widgetNew->SetItemIndex(rowNum);
     this->widgetNew->SetSettings(&obj);
 }
 
 QString ConnectionList::getConnectedIndexText(int nowIndex)
 {
-    if (this->connnectedRowIndex ==  nowIndex) {
-        return "connected";
+    if (getConnectedIndex() == nowIndex) {
+        return "Connected";
     }else{
-        return "disconnected";
+        return "Disconnected";
     }
 }
 
 void ConnectionList::UpdateConnectionList(){
     this->RefleshConnectionList();
+}
+
+void ConnectionList::SetDelayTested(int index, int delaytime)
+{
+    ConfigManager::SetLastDelayTime(index, delaytime);
+    this->UpdateConnectionList();
+}
+
+void ConnectionList::SetLastConnectedIndex(int index)
+{
+    ConfigManager::SetLastConnectedIndex(index);
 }
 
 

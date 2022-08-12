@@ -15,11 +15,8 @@ void TrojanGoManger::run() {
     if (this->started) {
         this->Disconnet();
     }
-    char buf[this->configPath.size()];
-    for (int i=0;i<configPath.size();i++) {
-        buf[i] = this->configPath[i].unicode();
-    }
-    Start({buf, this->configPath.size()});
+
+    Start(ToGoString(this->configPath));
     this->started = true;
 }
 
@@ -27,4 +24,12 @@ void TrojanGoManger::Disconnet(){
     Stop();
     this->started = false;
     this->quit();
+}
+
+void TrojanGoManger::parseShareLink(QString shareLink, QString outPutPath){
+    ParseShareLinkToJsonFile(ToGoString(shareLink), ToGoString(outPutPath));
+}
+
+GoString TrojanGoManger::ToGoString(QString str){
+    return {str.toUtf8(), str.size()};
 }

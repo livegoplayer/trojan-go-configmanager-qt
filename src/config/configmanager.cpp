@@ -9,16 +9,12 @@
 #include <QFile>
 #include "src/config/qconfigjsonobject.h"
 #include "src/config/qtrojangoclientconfigjsonobject.h"
+#include "src/trojan/trojangomanger.h"
+#include <QDesktopServices>
 
 // 配置管理类
-ConfigManager::ConfigManager(QWidget *parent)
-    : QWidget{parent}
+ConfigManager::ConfigManager()
 {
-    this->connectionPath="./config/connectionList.json";
-    this->clientConfigPath="./config/config.json";
-
-    this->connectionPath = this->getAbsolutePath(this->connectionPath);
-    this->clientConfigPath = this->getAbsolutePath(this->clientConfigPath);
 }
 
 QString ConfigManager::getAbsolutePath(QString str)
@@ -28,77 +24,135 @@ QString ConfigManager::getAbsolutePath(QString str)
     return sFilePath;
 }
 
+QString ConfigManager::GetConnectionPath()
+{
+    return getAbsolutePath(connectionPath);
+}
+
+QString ConfigManager::getShareLinkConfigPath()
+{
+    return getAbsolutePath(ShareLinkConfigPath);
+}
+
+QString ConfigManager::GetClientConfigPath()
+{
+    return getAbsolutePath(clientConfigPath);
+}
+
+
 int ConfigManager::AddConnectionConfig(QConfigJsonObject::QConnectionConfigJsonObject obj)
 {
-    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(this->connectionPath);
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
     qConfigJsonObject.AddConnectionConfig(obj);
-    this->SaveConfig(qConfigJsonObject);
-    emit this->configFileUpdated();
+    SaveConfig(qConfigJsonObject);
+    return 0;
+}
+
+int ConfigManager::SetLastDelayTime(int Index, int lastDelayTime)
+{
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
+    qConfigJsonObject.SetLastDelayTime(Index, lastDelayTime);
+    SaveConfig(qConfigJsonObject);
+    return 0;
+}
+
+int ConfigManager::SetLastConnectedIndex(int Index)
+{
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
+    qConfigJsonObject.SetLastConnectItem(Index);
+    SaveConfig(qConfigJsonObject);
     return 0;
 }
 
 int ConfigManager::EditConnectionConfig(int Index, QConfigJsonObject::QConnectionConfigJsonObject obj)
 {
-    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(this->connectionPath);
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
     qConfigJsonObject.EditConnectionConfig(Index, obj);
-    this->SaveConfig(qConfigJsonObject);
-    emit this->configFileUpdated();
+    SaveConfig(qConfigJsonObject);
     return 0;
 }
 
 int ConfigManager::DelConnectionConfig(int index)
 {
-    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(this->connectionPath);
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
 
     qConfigJsonObject.DelConnectionConfig(index);
-    this->SaveConfig(qConfigJsonObject);
-
-    emit this->configFileUpdated();
+    SaveConfig(qConfigJsonObject);
     return 0;
 }
 
 
 int ConfigManager::UpConnectionConfig(int index)
 {
-    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(this->connectionPath);
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
 
     qConfigJsonObject.UpConnectionConfig(index);
-    this->SaveConfig(qConfigJsonObject);
+    SaveConfig(qConfigJsonObject);
 
-    emit this->configFileUpdated();
+    return 0;
+}
+
+int ConfigManager::DownConnectionConfig(int index)
+{
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
+
+    qConfigJsonObject.DownConnectionConfig(index);
+    SaveConfig(qConfigJsonObject);
     return 0;
 }
 
 
+
 QConfigJsonObject ConfigManager::GetConfigs()
 {
-    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(this->connectionPath);
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
     return qConfigJsonObject;
 }
 
 void ConfigManager::SaveConfig(QConfigJsonObject config)
 {
-    config.SaveToFile(this->connectionPath);
+    config.SaveToFile(GetConnectionPath());
 }
 
 
 QConfigJsonObject::QConnectionConfigListJsonObject ConfigManager::GetConnectionConfigList()
 {
-    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(this->connectionPath);
+    QConfigJsonObject qConfigJsonObject = QConfigJsonObject::GetFromFile(GetConnectionPath());
     return qConfigJsonObject.GetConnectionList();
 }
 
 QConfigJsonObject::QConnectionConfigJsonObject ConfigManager::GetConnectionConfigItem(int index)
 {
-    return this->GetConnectionConfigList().At(index);
+    return GetConnectionConfigList().At(index);
+}
+
+void ConfigManager::SetHideClose(bool value)
+{
+    QConfigJsonObject config = *GetConfigs().SetHideClose(value);
+    SaveConfig(config);
+}
+
+bool ConfigManager::GetHideClose()
+{
+    return GetConfigs().GetHideClose();
+}
+
+bool ConfigManager::GetAutoConnect()
+ {
+     return GetConfigs().GetAutoConnect();
+ }
+
+void ConfigManager::SetAutoConnect(bool value)
+{
+    QConfigJsonObject config = *GetConfigs().SetAutoConnect(value);
+    SaveConfig(config);
 }
 
 void ConfigManager::CreateClientConfigByItemIndex(int index)
 {
-    QConfigJsonObject config = this->GetConfigs();
+    QConfigJsonObject config = GetConfigs();
     QConfigJsonObject::QConnectionConfigListJsonObject array = config.GetConnectionList();
     QConfigJsonObject::QConnectionConfigJsonObject configItem = array.At(index);
-    QString name = configItem.GetName();
     QString server = configItem.GetServerAddr();
     int port = configItem.GetServerPort();
     QString passwpord = configItem.GetPassword();
@@ -159,9 +213,30 @@ void ConfigManager::CreateClientConfigByItemIndex(int index)
                 SetRouterConfigGeoipsite(config.GetRouterConfigGeoipsite());
     }
 
-    obj.SaveToFile(this->clientConfigPath);
+    obj.SaveToFile(GetClientConfigPath());
 }
 
-QString ConfigManager::GetClientConfigPath() {
-    return this->clientConfigPath;
+
+/**
+ * @brief TaskInfo::openLogFileDialog
+ * @abstract 打开日志文件
+ * @param errInfo
+ */
+void ConfigManager::openLogFileDialog()
+{
+    QString fileDir = getAbsolutePath(GetConfigs().GetLogFilePath());
+    bool is_open = QDesktopServices::openUrl(QUrl(QString("file:///") + fileDir));
+    if(!is_open)
+    {
+        qDebug()<<"log file open failed "<<is_open;
+        return;
+    }
+}
+
+void ConfigManager::addConnectionFromShareLink(QString shareLink)
+{
+    TrojanGoManger::parseShareLink(shareLink, getShareLinkConfigPath());
+    QTrojanGoClientConfigJsonObject qConfigJsonObject = QTrojanGoClientConfigJsonObject::GetFromFile(getShareLinkConfigPath());
+    QConfigJsonObject::QConnectionConfigJsonObject obj = QConfigJsonObject::QConnectionConfigJsonObject::NewFromClientConfigJson(&qConfigJsonObject);
+    AddConnectionConfig(obj);
 }

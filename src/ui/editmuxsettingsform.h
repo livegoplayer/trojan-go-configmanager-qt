@@ -17,7 +17,6 @@ public:
     explicit EditMuxSettingsForm(QWidget *parent = nullptr);
     ~EditMuxSettingsForm();
     // 配置管理组件
-    ConfigManager *ConfigManager;
     void InitMuxConfigs();
     void SaveMuxConfigs();
     void ResetMuxSettingsForm();

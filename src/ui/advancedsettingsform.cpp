@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <stdlib.h>
 #include <stdio.h>
+#include <QMessageBox>
 
 
 AdvancedSettingsForm::AdvancedSettingsForm(QWidget *parent) :
@@ -11,7 +12,6 @@ AdvancedSettingsForm::AdvancedSettingsForm(QWidget *parent) :
     ui(new Ui::AdvancedSettingsForm)
 {
     ui->setupUi(this);
-    this->ConfigManager = new class ConfigManager();
     this->RuleListEditDialog = new RuleListEdit();
     this->EditMuxSettingsForm = new class EditMuxSettingsForm();
     this->EditTcpSettingsForm = new class EditTcpSettingsForm();
@@ -19,6 +19,11 @@ AdvancedSettingsForm::AdvancedSettingsForm(QWidget *parent) :
 
     connect(ui->ok,  &QPushButton::pressed, this, [=] () {
         this->SaveAdvancedSettingFoem();
+        QMessageBox::StandardButton  reply = QMessageBox::question(this, "提示", "更改配置之后需要重启连接方能生效，是否重启？",
+                                    QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            emit this->requestReconnect();
+        }
     });
 
     connect(ui->cancel,  &QPushButton::pressed, this, [=] () {
@@ -55,7 +60,7 @@ AdvancedSettingsForm::~AdvancedSettingsForm()
 }
 
 void AdvancedSettingsForm::InitAdvancedSettingFoem() {
-    QConfigJsonObject configs = this->ConfigManager->GetConfigs();
+    QConfigJsonObject configs = ConfigManager::GetConfigs();
     QString localAddr = configs.GetLocalAddr();
     int localPort = configs.GetLocalPort();
     int LogLevel = configs.GetLogLevel();
@@ -87,7 +92,7 @@ void AdvancedSettingsForm::SaveAdvancedSettingFoem()
     bool routerProxyEnabe = ui->proxy_check_box->isChecked();
     bool routerBlockEnabe = ui->block_check_box->isChecked();
 
-    QConfigJsonObject configs = this->ConfigManager->GetConfigs();
+    QConfigJsonObject configs = ConfigManager::GetConfigs();
 
     configs.SetLogLevel(LogLevel)->SetLocalAddr(localAddr)->
             SetLocalPort(localPort)->
@@ -95,7 +100,7 @@ void AdvancedSettingsForm::SaveAdvancedSettingFoem()
             SetRouterConfigByPsssEnabled(routerByPassEnabe)->
             SetRouterConfigProxyEnabled(routerProxyEnabe)->
             SetRouterConfigBlockEnable(routerBlockEnabe);
-    this->ConfigManager->SaveConfig(configs);
+    ConfigManager::SaveConfig(configs);
 
     this->hide();
 }

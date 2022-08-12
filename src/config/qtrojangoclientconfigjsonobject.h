@@ -46,8 +46,8 @@ public:
     static const bool DEFAULT_ROUTER_ENABLED = true;
     constexpr static const char DEFAULT_ROUTER_DEFALUT_POLICY[] = "proxy";
     constexpr static const char DEFAULT_ROUTER_DOMAIN_STRATEGY[] = "as_is";
-    constexpr static const char DEFAULT_ROUTER_GEOIP[] = "$PROGRAM_DIR$/geoip.dat";
-    constexpr static const char DEFAULT_ROUTER_GEOSITE[] = "$PROGRAM_DIR$/geosite.dat";
+    constexpr static const char DEFAULT_ROUTER_GEOIP[] = "./dat/geoip.dat";
+    constexpr static const char DEFAULT_ROUTER_GEOSITE[] = "./dat//geosite.dat";
 
     // default ssl configs
     static const bool DEFAULT_SSL_VERIFY = true;

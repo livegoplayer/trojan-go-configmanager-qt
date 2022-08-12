@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>354</width>
-    <height>481</height>
+    <width>676</width>
+    <height>697</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,9 @@
    <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetDefaultConstraint</enum>
+   </property>
    <item>
     <widget class="QWidget" name="widget_4" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -57,6 +60,222 @@
           <widget class="QWidget" name="widget_3" native="true"/>
          </item>
         </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="addHelper">
+     <property name="text">
+      <string>显示添加助手</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="adds" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QPushButton" name="category_ads">
+        <property name="text">
+         <string>常见广告域名</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="category_ads_all">
+        <property name="text">
+         <string>所有广告域名</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="china" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QPushButton" name="geolocation_cn">
+        <property name="text">
+         <string>常见的大陆站点域名</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="tld_cn">
+        <property name="text">
+         <string>中国大陆的顶级域名</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cn">
+        <property name="text">
+         <string>常见的大陆站点域名+中国大陆的顶级域名</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="no_china" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item>
+       <widget class="QPushButton" name="notld_cn">
+        <property name="text">
+         <string>非中国大陆使用的顶级域名</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="nogeolocation_cn">
+        <property name="text">
+         <string>常见的非大陆站点域名+非中国大陆使用的顶级域名</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="always_use" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QPushButton" name="Facebook">
+        <property name="text">
+         <string>Facebook</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Microsoft">
+        <property name="text">
+         <string>Microsoft</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Google">
+        <property name="text">
+         <string>Google</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Apple">
+        <property name="text">
+         <string>Apple </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Twitter">
+        <property name="text">
+         <string>Twitter</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Telegram">
+        <property name="text">
+         <string>Telegram</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="diyAddHelper">
+     <property name="text">
+      <string>显示自定义添加助手</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="textdiyhelper" native="true">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>1.如果以上满足不了要求，你想要更加细粒度的屏蔽（比如我想要只屏蔽优酷的广告提供商）请参照：</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>https://www.v2fly.org/config/routing.html#预定义域名列表</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>https://github.com/v2fly/domain-list-community/tree/master/data</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>2.如果你想简单的添加一些自定义的网站，比如说发现一些广告屏蔽不了，在找到广告提供商域名之后可以用以下规则添加：</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>“domain:&quot;，子域名匹配   如：   屏蔽百度子域名   domain:baidu.com</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>“full:&quot;，完全域名匹配    如        屏蔽百度:    full:www.baidu,com</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>“regexp:&quot;，正则表达式匹配        请自己百度</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>“cidr:&quot;，CIDR匹配    同上   例子： cidr:192.168.1.0/24</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>以上参照于 ：https://p4gefau1t.github.io/trojan-go/advance/router/</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
        </widget>
       </item>
      </layout>

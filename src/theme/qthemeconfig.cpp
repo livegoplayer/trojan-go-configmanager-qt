@@ -12,19 +12,18 @@
 QThemeConfig::QThemeConfig(QObject *parent)
     : QObject{parent}
 {
-    this->ConfigManager = new class ConfigManager();
     this->updateTheme();
 }
 
 bool QThemeConfig::isDarkTheme()
 {
-    return this->ConfigManager->GetConfigs().GetTheme() == QConfigJsonObject::THEME_DARK;
+    return ConfigManager::GetConfigs().GetTheme() == QConfigJsonObject::THEME_DARK;
 }
 
 
 bool QThemeConfig::isLightTheme()
 {
-    return this->ConfigManager->GetConfigs().GetTheme() == QConfigJsonObject::THEME_LIGHT;
+    return ConfigManager::GetConfigs().GetTheme() == QConfigJsonObject::THEME_LIGHT;
 }
 
 
@@ -33,11 +32,26 @@ void QThemeConfig::setTheme(int theme)
     if (isLightTheme() && theme == QConfigJsonObject::THEME_DARK) {
         applyDarkPalette();
         applyDarkQss();
+        QConfigJsonObject config = ConfigManager::GetConfigs();
+        config.SetTheme(QConfigJsonObject::THEME_DARK);
+        ConfigManager::SaveConfig(config);
     }
     if (isDarkTheme() && theme == QConfigJsonObject::THEME_LIGHT) {
         applyLightPalette();
         applyLightQss();
-    }
+        QConfigJsonObject config = ConfigManager::GetConfigs();
+        config.SetTheme(QConfigJsonObject::THEME_LIGHT);
+        ConfigManager::SaveConfig(config);    }
+}
+
+void QThemeConfig::SetLightTheme()
+{
+    this->setTheme(QConfigJsonObject::THEME_LIGHT);
+}
+
+void QThemeConfig::SetDrakTheme()
+{
+    this->setTheme(QConfigJsonObject::THEME_DARK);
 }
 
 void QThemeConfig::updateTheme()

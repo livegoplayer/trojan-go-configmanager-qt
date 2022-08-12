@@ -7,7 +7,6 @@ EditMuxSettingsForm::EditMuxSettingsForm(QWidget *parent) :
 {
 
     ui->setupUi(this);
-    this->ConfigManager = new class ConfigManager();
 
     this->InitMuxConfigs();
     connect(ui->ok, &QPushButton::pressed, this, [=] () {
@@ -33,14 +32,14 @@ EditMuxSettingsForm::~EditMuxSettingsForm()
 void EditMuxSettingsForm::SaveMuxConfigs() {
     int concurrency = ui->concurrency->value();
     int idle_timeout = ui->idle_timeout->value();
-    QConfigJsonObject config = this->ConfigManager->GetConfigs();
+    QConfigJsonObject config = ConfigManager::GetConfigs();
     config.SetMuxConfigConcurrency(concurrency);
     config.SetMuxConfigIdleTimeout(idle_timeout);
-    this->ConfigManager->SaveConfig(config);
+    ConfigManager::SaveConfig(config);
 }
 
 void EditMuxSettingsForm::InitMuxConfigs() {
-    QConfigJsonObject config = this->ConfigManager->GetConfigs();
+    QConfigJsonObject config = ConfigManager::GetConfigs();
     int concurrency = config.GetMuxConfigConcurrency();
     int idle_timeout = config.GetMuxConfigIdleTimeout();
     ui->concurrency->setValue(concurrency);
